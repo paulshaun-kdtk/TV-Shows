@@ -1,7 +1,7 @@
 {
   "name": "week5_api_capstone",
   "version": "1.0.0",
-  "description": "",
+  "description": "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\r https://github.com/paulshaun-kdtk/Week5_API_Capstone",
   "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -13,7 +13,11 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "babel-eslint": "^10.1.0",
     "css-loader": "^6.8.1",
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.28.0",
     "hint": "^7.1.10",
     "html-webpack-plugin": "^5.5.3",
     "style-loader": "^3.3.3",
@@ -27,5 +31,6 @@
   },
   "dependencies": {
     "lodash": "^4.17.21"
-  }
+  },
+  "main": "webpack.config.js"
 }

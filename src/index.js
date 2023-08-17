@@ -1,17 +1,13 @@
 import './style.css';
 
-import './style.css';
-
-import './style.css';
-
 // Define the likeShow function
 async function likeShow(showId) {
   try {
     const response = await fetch(`https://your-backend-server.com/api/like/${showId}`, {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer 6d450e945960955ec37274e3f6d201d7' 
-      }
+        Authorization: 'Bearer 6d450e945960955ec37274e3f6d201d7',
+      },
     });
 
     if (response.ok) {
@@ -35,10 +31,10 @@ async function fetchTVMazeData() {
     const response = await fetch(apiUrl);
     const data = await response.json();
 
-    data.forEach(show => {
+    data.forEach((show) => {
       const showDiv = document.createElement('div');
       const showId = show.id;
-      showDiv.classList.add('movieContainer')
+      showDiv.classList.add('movieContainer');
 
       // Initialize likes for each show
       if (!localStorage.getItem(`likes-${showId}`)) {
@@ -58,7 +54,7 @@ async function fetchTVMazeData() {
     // Event delegation for handling button click
     tvShowsDiv.addEventListener('click', (event) => {
       if (event.target.classList.contains('like-button')) {
-        const showId = event.target.dataset.showId;
+        const { showId } = event.target.dataset;
         likeShow(showId);
       }
     });
