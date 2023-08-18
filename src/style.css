@@ -15,12 +15,10 @@ html {
 }
 
 body {
-  background: white;
-  font-family: Arial, Helvetica, sans-serif;
   font-size: 15px;
   font-weight: normal;
   line-height: 18px;
-  background-image: linear-gradient(to left, #2f4858, #33658a);
+  background-image: url(./bg.avif);
 }
 
 .logo {
@@ -31,6 +29,10 @@ body {
   height: 70px;
   width: 70px;
   cursor: pointer;
+  background-image: url(images.jpeg);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 header {
@@ -88,7 +90,7 @@ footer {
 }
 
 img {
-  width: 136px;
+  width: 180px;
   height: auto;
 }
 
@@ -244,44 +246,4 @@ input[type=text] {
   display: flex;
   justify-content: space-around;
   height: 20px;
-}
-
-@media screen and (min-width: 1024px) and (max-height: 600px) {
-  .card-container {
-    background-color: #fff;
-    width: 60%;
-    height: 100vh;
-    margin: auto;
-
-    /* padding: 16px; */
-    border: none;
-  }
-
-  h3 {
-    font-size: 16px;
-    margin: 10px 0 10px;
-  }
-
-  .modal-body img {
-    width: 50%;
-    padding-top: 0;
-    height: 5%;
-  }
-
-  ul.comment-list li {
-    border: 1px solid rgb(249, 246, 246);
-    margin-top: 4px;
-    padding: 7px;
-  }
-
-  .content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .form-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
 }
