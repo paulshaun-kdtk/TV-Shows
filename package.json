@@ -26,6 +26,7 @@
     "webpack-dev-server": "^4.15.1"
   },
   "dependencies": {
+    "http-proxy-middleware": "^2.0.6",
     "lodash": "^4.17.21"
   }
 }

@@ -1,70 +1,123 @@
-import './style.css';
+import './style.css'
 
-import './style.css';
+async function createLike(appId, itemId) {
+  const url = `https://us-central1-involvement-api.cloudfunctions.net/capstoneApi/apps/${appId}/likes`;
 
-import './style.css';
-
-// Define the likeShow function
-async function likeShow(showId) {
   try {
-    const response = await fetch(`https://your-backend-server.com/api/like/${showId}`, {
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer 6d450e945960955ec37274e3f6d201d7' 
-      }
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        item_id: itemId
+      })
     });
-
-    if (response.ok) {
-      const updatedLikes = await response.json();
-      const likesElement = document.getElementById(`likes-${showId}`);
-      likesElement.textContent = `${updatedLikes} Likes`;
+  
+    if (response.status === 201) {  
+        return true; 
     } else {
-      console.error('Failed to increment like count.');
+      return false; 
     }
   } catch (error) {
-    console.error('Error:', error);
+    console.error('An error occurred:', error);
+    return false; 
   }
 }
 
-// Fetch TVMaze data and create show elements
+
+async function fetchLikesForShows(appId) {
+  const url = `https://us-central1-involvement-api.cloudfunctions.net/capstoneApi/apps/${appId}/likes`;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+
+    const likesData = {};
+    data.forEach(item => {
+      const itemId = item.item_id;
+      const likeCount = item.like_count;
+      likesData[itemId] = likeCount;
+    });
+
+    return likesData;
+  } catch (error) {
+    console.error('Error fetching likes data:', error);
+    return {};
+  }
+}
+
+
+async function updateLikeCount(appId,likeCount) {
+  const url = `https://us-central1-involvement-api.cloudfunctions.net/capstoneApi/apps/${appId}/likes`;
+  appId = 'mgzCjCAnCFpXiG8i4TFX'
+
+  try {
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        like_count: likeCount
+      })
+    });
+
+    return response.status === 200;
+  } catch (error) {
+    console.error('An error occurred:', error);
+    return false;
+  }
+}
+
+
 async function fetchTVMazeData() {
+  const appId = 'mgzCjCAnCFpXiG8i4TFX'; 
   const apiUrl = 'https://api.tvmaze.com/shows';
   const tvShowsDiv = document.getElementById('dynamicDisplay');
 
   try {
     const response = await fetch(apiUrl);
     const data = await response.json();
+    const likesData = await fetchLikesForShows(appId); 
 
     data.forEach(show => {
       const showDiv = document.createElement('div');
       const showId = show.id;
-      showDiv.classList.add('movieContainer')
+      showDiv.classList.add('movieContainer');
 
-      // Initialize likes for each show
-      if (!localStorage.getItem(`likes-${showId}`)) {
-        localStorage.setItem(`likes-${showId}`, '0');
-      }
+      let likeCount = likesData[showId] ?? 0;
 
       showDiv.innerHTML = `
         <h2>${show.name}</h2>
         <img src="${show.image?.medium}" alt="${show.name} Image" width="200">
         <p>${show.description}</p>
         <button class="like-button" data-show-id="${showId}">Like</button>
-        <span id="likes-${showId}">${localStorage.getItem(`likes-${showId}`)} Likes</span>
+        <span id="likes-${showId}">${likeCount} Likes</span>
       `;
+
+      const likeButton = showDiv.querySelector('.like-button');
+      likeButton.addEventListener('click', async () => {
+        console.log('Like button clicked');
+        const success = await createLike(appId, showId);
+        console.log('createLike success:', success);
+        if (success) {
+          likeCount += 1;
+          const updateSuccess = await updateLikeCount(appId,likeCount);
+          if (updateSuccess) {
+            const likesSpan = showDiv.querySelector(`#likes-${showId}`);
+            likesSpan.textContent = `${likeCount} Likes`;
+          }
+        }
+      });
+
       tvShowsDiv.appendChild(showDiv);
     });
 
-    // Event delegation for handling button click
-    tvShowsDiv.addEventListener('click', (event) => {
-      if (event.target.classList.contains('like-button')) {
-        const showId = event.target.dataset.showId;
-        likeShow(showId);
-      }
-    });
   } catch (error) {
     console.error('Error fetching data:', error);
   }
 }
+
 
 fetchTVMazeData();
