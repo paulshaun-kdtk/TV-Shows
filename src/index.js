@@ -1,66 +1,57 @@
 import './style.css';
+import {
+  displayShows,
+  showComments,
+  showDetails,
+} from '../modules/shows.js';
 
-// Define the likeShow function
-async function likeShow(showId) {
-  try {
-    const response = await fetch(`https://your-backend-server.com/api/like/${showId}`, {
-      method: 'POST',
-      headers: {
-        Authorization: 'Bearer 6d450e945960955ec37274e3f6d201d7',
-      },
-    });
+displayShows();
 
-    if (response.ok) {
-      const updatedLikes = await response.json();
-      const likesElement = document.getElementById(`likes-${showId}`);
-      likesElement.textContent = `${updatedLikes} Likes`;
-    } else {
-      console.error('Failed to increment like count.');
-    }
-  } catch (error) {
-    console.error('Error:', error);
-  }
-}
+const modal = document.querySelector('#item-modal');
 
-// Fetch TVMaze data and create show elements
-async function fetchTVMazeData() {
-  const apiUrl = 'https://api.tvmaze.com/shows';
-  const tvShowsDiv = document.getElementById('dynamicDisplay');
+window.addEventListener('load', () => {
+  const btns = [...document.querySelectorAll('.comment')];
+  btns.forEach((modalBtn) => {
+    modalBtn.addEventListener('click', async (event) => {
+      if (event.target.id !== null) {
+        // show modal
+        modal.style.display = 'block';
 
-  try {
-    const response = await fetch(apiUrl);
-    const data = await response.json();
+        // show tv shows
+        const tvshowDetails = await showDetails(event.target.id);
+        const genres = document.getElementById('genres');
+        genres.innerHTML = '';
+        document.getElementById('tv-show-title').textContent = tvshowDetails.name;
+        document.getElementById('tv-show-img').setAttribute('src', tvshowDetails.image.medium);
+        document.getElementById('summary').innerHTML = `${tvshowDetails.summary}`;
+        const res = await showComments(event.target.id);
+        const commentList = document.querySelector('.comment-list');
+        let pElement = '';
+        tvshowDetails.genres.forEach((item) => {
+          pElement += `<p>${item}</p>`;
+        });
+        genres.innerHTML = pElement;
 
-    data.forEach((show) => {
-      const showDiv = document.createElement('div');
-      const showId = show.id;
-      showDiv.classList.add('movieContainer');
-
-      // Initialize likes for each show
-      if (!localStorage.getItem(`likes-${showId}`)) {
-        localStorage.setItem(`likes-${showId}`, '0');
-      }
-
-      showDiv.innerHTML = `
-        <h2>${show.name}</h2>
-        <img src="${show.image?.medium}" alt="${show.name} Image" width="200">
-        <p>${show.description}</p>
-        <button class="like-button" data-show-id="${showId}">Like</button>
-        <span id="likes-${showId}">${localStorage.getItem(`likes-${showId}`)} Likes</span>
-      `;
-      tvShowsDiv.appendChild(showDiv);
-    });
-
-    // Event delegation for handling button click
-    tvShowsDiv.addEventListener('click', (event) => {
-      if (event.target.classList.contains('like-button')) {
-        const { showId } = event.target.dataset;
-        likeShow(showId);
+        commentList.innerHTML = '';
+        let liElement = '';
+        res.forEach((result) => {
+          if (result === null) {
+            liElement += ' <li>No comments for now</li>';
+          }
+          liElement += ` <li>${result.creation_date} ${result.username} ${result.comment}</li>`;
+        });
+        commentList.innerHTML = liElement;
       }
     });
-  } catch (error) {
-    console.error('Error fetching data:', error);
-  }
-}
+  });
+});
 
-fetchTVMazeData();
+window.onclick = (event) => {
+  if (event.target === modal) {
+    modal.style.display = 'none';
+  }
+};
+
+document.getElementsByClassName('close')[0].onclick = () => {
+  modal.style.display = 'none';
+};
