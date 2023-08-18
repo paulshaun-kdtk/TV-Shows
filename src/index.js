@@ -3,7 +3,7 @@ import {
   displayShows,
   showComments,
   showDetails,
-} from '../modules/shows.js';
+} from './modules/shows.js';
 
 displayShows();
 
