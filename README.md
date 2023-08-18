@@ -1,0 +1,4 @@
+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
+https://github.com/paulshaun-kdtk/Week5_API_Capstone
+
+sh copy_github_board.sh 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 microverseinc curriculum-javascript paulshaun-kdtk Week5_API_Capstone
