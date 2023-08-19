@@ -1,5 +1,6 @@
 import Utilities from './util.js';
 import LikeObj from './apiObj.js';
+import displayItemCounted from './count.js';
 
 const url = 'https://api.tvmaze.com/shows';
 const appIDLikes = `${Utilities.baseUrl}apps/st5awnig42N9i1c9g8rb/likes`;
@@ -37,6 +38,7 @@ const displayShows = async () => {
       showList.insertAdjacentHTML('beforeend', showItem);
     });
   }
+  displayItemCounted(shows);
 };
 
 const updateLikes = async () => {
@@ -116,10 +118,11 @@ const showComments = async (id) => {
     const url = `${Utilities.baseUrl}apps/st5awnig42N9i1c9g8rb/comments?item_id=${id}`;
     const requestOptions = { method: 'GET' };
     const response = await fetch(url, requestOptions);
-    if (response.ok) {
+    if (response.ok && response.status !== 400) {
       return await response.json();
     }
-    throw new Error(`HTTP error: ${response.status}`);
+
+    return [];
   } catch (e) {
     return Utilities.exception(e);
   }
@@ -145,6 +148,8 @@ const createShowComment = async (id, username, comment) => {
 const displayShowComment = async (id) => {
   //= === show comment=====
   const res = await showComments(id);
+  // console.log(res)
+  document.getElementById('no-of-comments').textContent = `(${Utilities.showCommentCounter(res)})`;
   const commentList = document.querySelector('.comment-list');
   commentList.innerHTML = '';
   let liElement = '';
