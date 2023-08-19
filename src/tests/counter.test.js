@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-const { itemCounter } = require('../modules/counter.js');
+const { itemCounter } = require('../modules/count.js');
 
 test('Should output the total items from API displayed on homepage', () => {
   const shows = [
