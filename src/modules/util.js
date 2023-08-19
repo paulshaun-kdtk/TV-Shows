@@ -6,11 +6,11 @@ export default class Utilities {
     static exception = (message) => message
 
     static getHeader() {
-        const headers = new Headers();
-        headers.append('Content-Type', 'application/x-www-form-urlencoded');
-        return headers;
-      }
-  
+      const headers = new Headers();
+      headers.append('Content-Type', 'application/x-www-form-urlencoded');
+      return headers;
+    }
+
        static getParams = (id, username, comment) => {
          const urlencoded = new URLSearchParams();
          urlencoded.append('item_id', `${id}`);
@@ -18,7 +18,7 @@ export default class Utilities {
          urlencoded.append('comment', `${comment}`);
          return urlencoded;
        }
-  
+
         static cleanFormInput = () => {
           document.getElementById('name').value = '';
           document.getElementById('insights').value = '';
