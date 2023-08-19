@@ -52,6 +52,24 @@ async function createComment(appId, itemId, username, comment) {
   }
 }
 
+function createCommentModal() {
+  const modal = document.createElement('div');
+  modal.classList.add('comment-modal');
+  modal.innerHTML = `
+    <div class="comment-modal-content">
+      <span class="close-modal" id="close-modal">&times;</span>
+      <h3>Comments:</h3>
+      <ul class="comments-list-modal"></ul>
+      <form class="comment-form-modal">
+        <input type="text" placeholder="Your name" />
+        <textarea cols="50" rows="4" placeholder="Write a comment..."></textarea>
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+  `;
+  return modal;
+}
+
 async function fetchLikesForShows(appId) {
   const url = `https://us-central1-involvement-api.cloudfunctions.net/capstoneApi/apps/${appId}/likes/`;
 
@@ -118,7 +136,6 @@ async function fetchTVMazeData() {
         <span id="likes-${showId}">${likeCount} Likes</span>
         <button class="comment-button" id="comment-button">Comment</button>
 
-<div id="form-modal" style="">
         <div class="comments-section">
         <h3>Comments:</h3>
         <ul class="comments-list"></ul>
@@ -129,17 +146,8 @@ async function fetchTVMazeData() {
         <textarea cols="50" rows="4" placeholder="write a comment..."></textarea>
         <button type="submit">Submit</button>
       </form>
-</div>
       `;
-    
-        function toggleModal() {
-      const modal = document.getElementById('form-modal');
-      modal.classList.toggle('show');
-    }
-
-    const commentButton = showDiv.querySelector('.comment-button');
-commentButton.addEventListener('click', toggleModal);
-
+      
       const commentForm = showDiv.querySelector('.comment-form');
       const commentsList = showDiv.querySelector('.comments-list');
       const commentsData = await fetchCommentsForShow(appId, show.id);
