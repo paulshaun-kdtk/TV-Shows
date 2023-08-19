@@ -1,70 +1,84 @@
 import './style.css';
+import {
+  displayShows,
+  updateLikes,
+  postLikes,
+  showDetails,
+  createShowComment,
+  displayShowComment,
+} from './modules/show.js';
+import Utilities from './modules/util.js';
 
-import './style.css';
+const render = async () => {
+  displayShows();
+  updateLikes();
+  postLikes();
+};
 
-import './style.css';
+render();
 
-// Define the likeShow function
-async function likeShow(showId) {
-  try {
-    const response = await fetch(`https://your-backend-server.com/api/like/${showId}`, {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer 6d450e945960955ec37274e3f6d201d7' 
+const modal = document.querySelector('#item-modal');
+
+window.addEventListener('click', () => {
+  const btns = [...document.querySelectorAll('.comment')];
+  btns.forEach((modalBtn) => {
+    modalBtn.addEventListener('click', async (event) => {
+      if (event.target.id !== null) {
+        // show modal
+        modal.style.display = 'block';
+
+        //= === show tv show details====
+        const tvshowDetails = await showDetails(event.target.id);
+        document.getElementById('tv-show-title').textContent = tvshowDetails.name;
+        document
+          .getElementById('tv-show-img')
+          .setAttribute('src', tvshowDetails.image.medium);
+        document.getElementById('show-id').setAttribute('data-id', event.target.id);
+        document.getElementById(
+          'summary',
+        ).innerHTML = `${tvshowDetails.summary}`;
+
+        // show genre
+        const genres = document.getElementById('genres');
+        genres.innerHTML = '';
+        let pElement = '';
+        tvshowDetails.genres.forEach((item) => {
+          pElement += `<p>${item}</p>`;
+        });
+        genres.innerHTML = pElement;
+        await displayShowComment(event.target.id);
       }
     });
+  });
+});
 
-    if (response.ok) {
-      const updatedLikes = await response.json();
-      const likesElement = document.getElementById(`likes-${showId}`);
-      likesElement.textContent = `${updatedLikes} Likes`;
-    } else {
-      console.error('Failed to increment like count.');
-    }
-  } catch (error) {
-    console.error('Error:', error);
+window.onclick = (event) => {
+  if (event.target === modal) {
+    modal.style.display = 'none';
   }
-}
+};
 
-// Fetch TVMaze data and create show elements
-async function fetchTVMazeData() {
-  const apiUrl = 'https://api.tvmaze.com/shows';
-  const tvShowsDiv = document.getElementById('dynamicDisplay');
+document.getElementsByClassName('close')[0].onclick = () => {
+  modal.style.display = 'none';
+};
 
-  try {
-    const response = await fetch(apiUrl);
-    const data = await response.json();
+// add comment
+document.getElementById('add-comment').addEventListener('click', async () => {
+  const id = document.getElementById('show-id').getAttribute('data-id');
+  const username = document.getElementById('name').value;
+  const comment = document.getElementById('insights').value;
+  const sms = document.getElementById('message');
 
-    data.forEach(show => {
-      const showDiv = document.createElement('div');
-      const showId = show.id;
-      showDiv.classList.add('movieContainer')
-
-      // Initialize likes for each show
-      if (!localStorage.getItem(`likes-${showId}`)) {
-        localStorage.setItem(`likes-${showId}`, '0');
-      }
-
-      showDiv.innerHTML = `
-        <h2>${show.name}</h2>
-        <img src="${show.image?.medium}" alt="${show.name} Image" width="200">
-        <p>${show.description}</p>
-        <button class="like-button" data-show-id="${showId}">Like</button>
-        <span id="likes-${showId}">${localStorage.getItem(`likes-${showId}`)} Likes</span>
-      `;
-      tvShowsDiv.appendChild(showDiv);
-    });
-
-    // Event delegation for handling button click
-    tvShowsDiv.addEventListener('click', (event) => {
-      if (event.target.classList.contains('like-button')) {
-        const showId = event.target.dataset.showId;
-        likeShow(showId);
-      }
-    });
-  } catch (error) {
-    console.error('Error fetching data:', error);
+  if (username !== '' && id !== '' && comment !== '') {
+    sms.style.display = 'block';
+    createShowComment(id, username, comment);
+    Utilities.cleanFormInput();
+    sms.style.color = 'green';
+    sms.textContent = '-Done';
+    await displayShowComment(id);
+  } else {
+    sms.style.display = 'block';
+    sms.style.color = 'red';
+    sms.textContent = '-Fields required';
   }
-}
-
-fetchTVMazeData();
+});
