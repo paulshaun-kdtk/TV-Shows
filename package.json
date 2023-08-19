@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "http-proxy-middleware": "^2.0.6",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.3.2"
   }
 }

@@ -25,9 +25,35 @@ async function createLike(appId, itemId) {
   }
 }
 
+async function createComment(appId, itemId, username, comment) {
+  const url = `https://us-central1-involvement-api.cloudfunctions.net/capstoneApi/apps/${appId}/comments`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        item_id: itemId,
+        username: username,
+        comment: comment
+      })
+    });
+
+    if (response.status === 201) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    console.error('An error occurred:', error);
+    return false;
+  }
+}
 
 async function fetchLikesForShows(appId) {
-  const url = `https://us-central1-involvement-api.cloudfunctions.net/capstoneApi/apps/${appId}/likes`;
+  const url = `https://us-central1-involvement-api.cloudfunctions.net/capstoneApi/apps/${appId}/likes/`;
 
   try {
     const response = await fetch(url);
@@ -36,7 +62,7 @@ async function fetchLikesForShows(appId) {
     const likesData = {};
     data.forEach(item => {
       const itemId = item.item_id;
-      const likeCount = item.like_count;
+      const likeCount = item.likes;
       likesData[itemId] = likeCount;
     });
 
@@ -48,31 +74,27 @@ async function fetchLikesForShows(appId) {
 }
 
 
-async function updateLikeCount(appId,likeCount) {
-  const url = `https://us-central1-involvement-api.cloudfunctions.net/capstoneApi/apps/${appId}/likes`;
-  appId = 'mgzCjCAnCFpXiG8i4TFX'
+async function fetchCommentsForShow(appId, showId) {
+  const url = `https://us-central1-involvement-api.cloudfunctions.net/capstoneApi/apps/${appId}/comments?item_id=${showId}`;
 
   try {
-    const response = await fetch(url, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        like_count: likeCount
-      })
-    });
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch comments');
+    }
 
-    return response.status === 200;
+    const data = await response.json();
+    return data; 
   } catch (error) {
-    console.error('An error occurred:', error);
-    return false;
+    console.error(`Could not get comments for ${showId}:`, error.message);
+    return []; 
   }
 }
 
 
 async function fetchTVMazeData() {
-  const appId = 'mgzCjCAnCFpXiG8i4TFX'; 
+  const appId = 'SGCdurOHua92K8iHUcg6'; 
   const apiUrl = 'https://api.tvmaze.com/shows';
   const tvShowsDiv = document.getElementById('dynamicDisplay');
 
@@ -81,20 +103,65 @@ async function fetchTVMazeData() {
     const data = await response.json();
     const likesData = await fetchLikesForShows(appId); 
 
-    data.forEach(show => {
+    for (const show of data) {
       const showDiv = document.createElement('div');
       const showId = show.id;
       showDiv.classList.add('movieContainer');
-
+  
       let likeCount = likesData[showId] ?? 0;
-
+  
       showDiv.innerHTML = `
         <h2>${show.name}</h2>
         <img src="${show.image?.medium}" alt="${show.name} Image" width="200">
         <p>${show.description}</p>
         <button class="like-button" data-show-id="${showId}">Like</button>
         <span id="likes-${showId}">${likeCount} Likes</span>
+        <button class="comment-button" id="comment-button">Comment</button>
+
+<div id="form-modal" style="">
+        <div class="comments-section">
+        <h3>Comments:</h3>
+        <ul class="comments-list"></ul>
+      </div>
+
+        <form class="comment-form" data-show-id="${showId}">
+        <input type="text" placeholder="your name" />
+        <textarea cols="50" rows="4" placeholder="write a comment..."></textarea>
+        <button type="submit">Submit</button>
+      </form>
+</div>
       `;
+    
+        function toggleModal() {
+      const modal = document.getElementById('form-modal');
+      modal.classList.toggle('show');
+    }
+
+    const commentButton = showDiv.querySelector('.comment-button');
+commentButton.addEventListener('click', toggleModal);
+
+      const commentForm = showDiv.querySelector('.comment-form');
+      const commentsList = showDiv.querySelector('.comments-list');
+      const commentsData = await fetchCommentsForShow(appId, show.id);
+
+      commentForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const input = commentForm.querySelector('input');
+        const textarea = commentForm.querySelector('textarea');
+        const username = input.value.trim();
+        const comment = textarea.value.trim();
+      
+        if (username !== '' && comment !== '') {
+          const success = await createComment(appId, showId, username, comment);
+          if (success) {
+            const commentItem = document.createElement('li');
+            commentItem.textContent = comment;
+            commentsList.appendChild(commentItem);
+            input.value = '';
+            textarea.value = '';
+          }
+        }
+      });
 
       const likeButton = showDiv.querySelector('.like-button');
       likeButton.addEventListener('click', async () => {
@@ -102,22 +169,23 @@ async function fetchTVMazeData() {
         const success = await createLike(appId, showId);
         console.log('createLike success:', success);
         if (success) {
-          likeCount += 1;
-          const updateSuccess = await updateLikeCount(appId,likeCount);
-          if (updateSuccess) {
-            const likesSpan = showDiv.querySelector(`#likes-${showId}`);
-            likesSpan.textContent = `${likeCount} Likes`;
-          }
+          likeCount = await fetchLikesForShows(appId); 
+          const likesSpan = showDiv.querySelector(`#likes-${showId}`);
+          likesSpan.textContent = `${likeCount} Likes`;
         }
       });
 
-      tvShowsDiv.appendChild(showDiv);
-    });
+      commentsData.forEach(comment => {
+        const commentItem = document.createElement('li');
+        commentItem.textContent = `${comment.username}: ${comment.comment}`;
+        commentsList.appendChild(commentItem);
+      });
 
+      tvShowsDiv.appendChild(showDiv);
+    };
   } catch (error) {
     console.error('Error fetching data:', error);
   }
 }
-
 
 fetchTVMazeData();
