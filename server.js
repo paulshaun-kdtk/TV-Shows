@@ -11,9 +11,8 @@ app.use(
   createProxyMiddleware({
     target: targetApi,
     changeOrigin: true,
-  })
+  }),
 );
-
 
 const port = process.env.PORT || 8081;
 app.listen(port, () => {

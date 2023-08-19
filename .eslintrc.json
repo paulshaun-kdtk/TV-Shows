@@ -21,7 +21,10 @@
       "import/no-extraneous-dependencies": "off",
       "no-console": "off",
       "no-use-before-define": "off",
-      "no-unused-vars": "off"
+      "no-unused-vars": "off",
+      "no-await-in-loop": "off",
+      "no-restricted-syntax": "off",
+      "import/no-unresolved": "off"
         },
     "ignorePatterns": [
       "dist/",

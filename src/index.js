@@ -1,63 +1,67 @@
-import './style.css'
+import './style.css';
 
-async function createLike(appId, itemId) {
+const createLike = async (appId, itemId) => {
   const url = `https://us-central1-involvement-api.cloudfunctions.net/capstoneApi/apps/${appId}/likes`;
 
   try {
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        item_id: itemId
-      })
+        item_id: itemId,
+      }),
     });
-  
-    if (response.status === 201) {  
-        return true; 
-    } else {
-      return false; 
+
+    if (response.status === 201) {
+      return true;
     }
+    return false;
   } catch (error) {
     console.error('An error occurred:', error);
-    return false; 
+    return false;
   }
-}
+};
 
-async function createComment(appId, itemId, username, comment) {
+const createComment = async (appId, itemId, username, comment) => {
   const url = `https://us-central1-involvement-api.cloudfunctions.net/capstoneApi/apps/${appId}/comments`;
 
   try {
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         item_id: itemId,
-        username: username,
-        comment: comment
-      })
+        username,
+        comment,
+      }),
     });
 
     if (response.status === 201) {
       return true;
-    } else {
-      return false;
     }
+    return false;
   } catch (error) {
     console.error('An error occurred:', error);
     return false;
   }
-}
+};
 
-function createCommentModal() {
+const createCommentModal = (show) => {
   const modal = document.createElement('div');
-  modal.classList.add('comment-modal');
+  modal.classList.add('modal');
   modal.innerHTML = `
-    <div class="comment-modal-content">
+  <head>
+  <meta charset="utf-8" />
+  </head>
+    <div class="modal-content">
       <span class="close-modal" id="close-modal">&times;</span>
+      <img src="${show.image?.medium}" alt="${show.name} Image" width="200" class="modal-image">
+      <h6 style="margin:auto;">${show.name}</h6>
+      <p>${show.summary}</p>
       <h3>Comments:</h3>
       <ul class="comments-list-modal"></ul>
       <form class="comment-form-modal">
@@ -68,9 +72,9 @@ function createCommentModal() {
     </div>
   `;
   return modal;
-}
+};
 
-async function fetchLikesForShows(appId) {
+const fetchLikesForShows = async (appId) => {
   const url = `https://us-central1-involvement-api.cloudfunctions.net/capstoneApi/apps/${appId}/likes/`;
 
   try {
@@ -78,7 +82,7 @@ async function fetchLikesForShows(appId) {
     const data = await response.json();
 
     const likesData = {};
-    data.forEach(item => {
+    data.forEach((item) => {
       const itemId = item.item_id;
       const likeCount = item.likes;
       likesData[itemId] = likeCount;
@@ -89,86 +93,91 @@ async function fetchLikesForShows(appId) {
     console.error('Error fetching likes data:', error);
     return {};
   }
-}
+};
 
-
-async function fetchCommentsForShow(appId, showId) {
+const fetchCommentsForShow = async (appId, showId) => {
   const url = `https://us-central1-involvement-api.cloudfunctions.net/capstoneApi/apps/${appId}/comments?item_id=${showId}`;
 
   try {
     const response = await fetch(url);
-    
+
     if (!response.ok) {
       throw new Error('Failed to fetch comments');
     }
 
     const data = await response.json();
-    return data; 
+    return data;
   } catch (error) {
     console.error(`Could not get comments for ${showId}:`, error.message);
-    return []; 
+    return [];
   }
-}
+};
 
-
-async function fetchTVMazeData() {
-  const appId = 'SGCdurOHua92K8iHUcg6'; 
+const fetchTVMazeData = async () => {
+  const appId = 'SGCdurOHua92K8iHUcg6';
   const apiUrl = 'https://api.tvmaze.com/shows';
   const tvShowsDiv = document.getElementById('dynamicDisplay');
 
   try {
     const response = await fetch(apiUrl);
     const data = await response.json();
-    const likesData = await fetchLikesForShows(appId); 
+    const likesData = await fetchLikesForShows(appId);
 
     for (const show of data) {
       const showDiv = document.createElement('div');
       const showId = show.id;
       showDiv.classList.add('movieContainer');
-  
+
       let likeCount = likesData[showId] ?? 0;
-  
+
       showDiv.innerHTML = `
+      <head>
+      <meta charset="utf-8" />
+    </head>
         <h2>${show.name}</h2>
         <img src="${show.image?.medium}" alt="${show.name} Image" width="200">
-        <p>${show.description}</p>
-        <button class="like-button" data-show-id="${showId}">Like</button>
+        <p>${show.description}</P>
         <span id="likes-${showId}">${likeCount} Likes</span>
-        <button class="comment-button" id="comment-button">Comment</button>
-
-        <div class="comments-section">
-        <h3>Comments:</h3>
-        <ul class="comments-list"></ul>
+        <button class="like-button" data-show-id="${showId}">Like</button>
+<br />
+<br />
+        <button class="comment-button" id="comment-button" style="margin-left:20%;">Comment</button>
       </div>
-
-        <form class="comment-form" data-show-id="${showId}">
-        <input type="text" placeholder="your name" />
-        <textarea cols="50" rows="4" placeholder="write a comment..."></textarea>
-        <button type="submit">Submit</button>
-      </form>
       `;
-      
-      const commentForm = showDiv.querySelector('.comment-form');
-      const commentsList = showDiv.querySelector('.comments-list');
-      const commentsData = await fetchCommentsForShow(appId, show.id);
 
-      commentForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const input = commentForm.querySelector('input');
-        const textarea = commentForm.querySelector('textarea');
-        const username = input.value.trim();
-        const comment = textarea.value.trim();
-      
-        if (username !== '' && comment !== '') {
-          const success = await createComment(appId, showId, username, comment);
-          if (success) {
-            const commentItem = document.createElement('li');
-            commentItem.textContent = comment;
-            commentsList.appendChild(commentItem);
-            input.value = '';
-            textarea.value = '';
+      const commentButton = showDiv.querySelector('.comment-button');
+      commentButton.addEventListener('click', async () => {
+        const modal = createCommentModal(show);
+        const commentsData = await fetchCommentsForShow(appId, show.id);
+        commentsData.forEach((comment) => {
+          const commentItem = document.createElement('li');
+          commentItem.textContent = `${comment.username}: ${comment.comment}`;
+          modal.querySelector('.comments-list-modal').appendChild(commentItem);
+        });
+        modal.querySelector('.comment-form-modal').addEventListener('submit', async (event) => {
+          event.preventDefault();
+          const input = modal.querySelector('input');
+          const textarea = modal.querySelector('textarea');
+          const username = input.value.trim();
+          const comment = textarea.value.trim();
+
+          if (username !== '' && comment !== '') {
+            const success = await createComment(appId, showId, username, comment);
+            if (success) {
+              const commentItem = document.createElement('li');
+              commentItem.textContent = comment;
+              modal.querySelector('.comments-list-modal').appendChild(commentItem);
+              input.value = '';
+              textarea.value = '';
+            }
           }
-        }
+        });
+
+        showDiv.appendChild(modal);
+        modal.style.display = 'block';
+        modal.querySelector('.close-modal').addEventListener('click', () => {
+          modal.style.display = 'none';
+        });
       });
 
       const likeButton = showDiv.querySelector('.like-button');
@@ -177,23 +186,19 @@ async function fetchTVMazeData() {
         const success = await createLike(appId, showId);
         console.log('createLike success:', success);
         if (success) {
-          likeCount = await fetchLikesForShows(appId); 
+          const likesData = await fetchLikesForShows(appId);
+          likeCount = likesData[showId] ?? 0;
+
           const likesSpan = showDiv.querySelector(`#likes-${showId}`);
           likesSpan.textContent = `${likeCount} Likes`;
         }
       });
 
-      commentsData.forEach(comment => {
-        const commentItem = document.createElement('li');
-        commentItem.textContent = `${comment.username}: ${comment.comment}`;
-        commentsList.appendChild(commentItem);
-      });
-
       tvShowsDiv.appendChild(showDiv);
-    };
+    }
   } catch (error) {
     console.error('Error fetching data:', error);
   }
-}
+};
 
 fetchTVMazeData();
