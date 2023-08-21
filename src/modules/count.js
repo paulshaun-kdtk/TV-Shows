@@ -1,7 +1,7 @@
 const itemCounter = (item) => item.length;
 
 const displayItemCounted = (shows) => {
-  const counter = document.querySelector('.item-counter');
+  const counter = document.querySelectorAll('.item-counter');
   counter.innerText = `TV Shows(${itemCounter(shows)})`;
 };
 
