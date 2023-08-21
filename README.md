@@ -2,7 +2,7 @@
 
 <div align="center">
 
-  <h3><b>Tv-Maze Api</b></h3>
+  <h3><b>TV Shows</b></h3>
 
 </div>
 
@@ -29,9 +29,9 @@
 
 <!-- PROJECT DESCRIPTION  -->
 
-# 📖 Tv-Maze Api <a name="about-project"></a>
+# 📖 TV Shows <a name="about-project"></a>
 
-*Tv-Maze Api* An online engagement app that fetches data from and api and allows for user interaction to another api
+*TV Shows* An online TV shows engagement app that fetches data from and Tv maze API and allows for user interaction with another API to like and comment on their favorite Tv shows.
 
 ## 🛠 Built With <a name="built-with"></a>
 The app is built using Webpack as a bundler.
