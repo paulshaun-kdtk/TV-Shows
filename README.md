@@ -79,7 +79,7 @@ sh
 - Install this project with:
 
 sh
-  cd https://github.com/paulshaun-kdtk/leaderboard
+  cd https://github.com/paulshaun-kdtk/Week5_API_Capstone
 
   npm install or npm i
 
